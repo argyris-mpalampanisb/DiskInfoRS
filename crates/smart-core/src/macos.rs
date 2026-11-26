@@ -170,7 +170,7 @@ impl Obj {
         let mut p: IORegistryEntry = 0;
         // SAFETY: out pointer is valid; the returned parent is retained by the call.
         let r = unsafe { IORegistryEntryGetParentEntry(self.0, kIOServicePlane.as_ptr(), &mut p) };
-        (r == kIOReturnSuccess && p != 0).then_some(Obj(p))
+        (r == kIOReturnSuccess && p != 0).then(|| Obj(p))
     }
 
     fn prop(&self, key: &str) -> Option<Cf> {
@@ -213,7 +213,7 @@ struct Cf(CFTypeRef);
 
 impl Cf {
     fn wrap(p: CFTypeRef) -> Option<Cf> {
-        (!p.is_null()).then_some(Cf(p))
+        (!p.is_null()).then(|| Cf(p))
     }
 
     fn type_is(&self, id: CFTypeID) -> bool {
@@ -260,7 +260,7 @@ impl CfStr {
         let c = CString::new(s).ok()?;
         // SAFETY: valid C string.
         let r = unsafe { CFStringCreateWithCString(ptr::null(), c.as_ptr(), kCFStringEncodingUTF8) };
-        (!r.is_null()).then_some(CfStr(r))
+        (!r.is_null()).then(|| CfStr(r))
     }
 }
 
