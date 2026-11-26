@@ -25,12 +25,15 @@ VERSION=$(tr -d '\r' < Cargo.toml | sed -n 's/^version = "\(.*\)"/\1/p' | head -
 step() { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 
 # Linux only: the privileged helper is a static musl binary bundled as a Tauri sidecar.
+# It is built non-PIE (relocation-model=static): linuxdeploy runs `patchelf --set-rpath`
+# on everything in usr/bin, and that corrupts static-pie binaries (they segfault at
+# startup). A plain static binary has no .dynamic section, so linuxdeploy leaves it alone.
 helper() {
   [[ $OS == Linux ]] || return 0
   step "Building static diskinfo-helper (musl)"
   local musl="${TRIPLE/-gnu/-musl}"
   rustup target list --installed | grep -qx "$musl" || rustup target add "$musl"
-  cargo build --release -p diskinfo-helper --target "$musl"
+  RUSTFLAGS="${RUSTFLAGS:-} -C relocation-model=static" cargo build --release -p diskinfo-helper --target "$musl"
   mkdir -p app/src-tauri/binaries
   install -m 0755 "$CARGO_TARGET_DIR/$musl/release/diskinfo-helper" "app/src-tauri/binaries/diskinfo-helper-$TRIPLE"
 }
@@ -61,7 +64,24 @@ release_linux() {
   out="dist/DiskInfoRS-$VERSION-${TRIPLE%%-*}.AppImage"
   cp "$src" "$out"
   chmod +x "$out"
+  check_appimage "$out"
   step "Done: $out"
+}
+
+# Run the helper exactly as it was packed into the AppImage (bundling tools rewrite ELF files).
+check_appimage() {
+  step "Checking the bundled helper"
+  local tmp code=0 appimage
+  appimage=$(realpath "$1")
+  tmp=$(mktemp -d)
+  (cd "$tmp" && "$appimage" --appimage-extract usr/bin/diskinfo-helper >/dev/null)
+  file "$tmp/squashfs-root/usr/bin/diskinfo-helper"
+  "$tmp/squashfs-root/usr/bin/diskinfo-helper" --dump >/dev/null || code=$?
+  rm -rf "$tmp"
+  if [[ $code -ne 0 ]]; then
+    echo "error: bundled diskinfo-helper --dump failed (exit $code)" >&2
+    exit 1
+  fi
 }
 
 release_macos() {
