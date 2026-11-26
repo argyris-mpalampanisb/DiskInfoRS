@@ -50,5 +50,15 @@ jobs:
       # Exercises the real device enumeration path (sysfs / IOKit) on the runner.
       - name: Smoke test diskinfo-helper
         run: |
-          cargo run -q -p diskinfo-helper -- --dump | tee dump.json
+          set -o pipefail
+          cargo build -q -p diskinfo-helper
+          if ! target/debug/diskinfo-helper --dump > dump.json; then
+            echo "::error::diskinfo-helper --dump failed (exit $?)"
+            if [[ $RUNNER_OS == macOS ]]; then
+              ioreg -r -c IOBlockStorageDevice -l -w0 | head -150 || true
+              lldb --batch -o run -k "thread backtrace all" -k quit -- target/debug/diskinfo-helper --dump || true
+            fi
+            exit 1
+          fi
+          cat dump.json
           python3 -c "import json; d=json.load(open('dump.json')); print(len(d['disks']), 'disk(s)')"
