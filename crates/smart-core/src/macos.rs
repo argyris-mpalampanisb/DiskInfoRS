@@ -75,6 +75,7 @@ extern "C" {
     fn IOObjectRelease(o: IOObject) -> KernReturn;
     fn IOObjectRetain(o: IOObject) -> KernReturn;
     fn IOObjectConformsTo(o: IOObject, class: *const c_char) -> Boolean;
+    fn IORegistryEntryGetName(e: IORegistryEntry, name: *mut c_char) -> KernReturn;
     fn IORegistryEntryGetParentEntry(e: IORegistryEntry, plane: *const c_char, parent: *mut IORegistryEntry) -> KernReturn;
     fn IORegistryEntryCreateCFProperty(e: IORegistryEntry, key: CFStringRef, alloc: CFAllocatorRef, opts: IOOptionBits) -> CFTypeRef;
     fn IORegistryEntrySearchCFProperty(
@@ -192,6 +193,18 @@ impl Obj {
                 kIORegistryIterateRecursively | kIORegistryIterateParents,
             )
         })
+    }
+
+    /// Registry name, e.g. "APPLE SSD AP0512Q Media".
+    fn name(&self) -> Option<String> {
+        let mut buf = [0 as c_char; 128]; // io_name_t
+        // SAFETY: buf is the io_name_t size the call requires; it NUL-terminates.
+        if unsafe { IORegistryEntryGetName(self.0, buf.as_mut_ptr()) } != kIOReturnSuccess {
+            return None;
+        }
+        // SAFETY: NUL-terminated by the call above.
+        let s = unsafe { CStr::from_ptr(buf.as_ptr()) }.to_string_lossy().trim().to_string();
+        (!s.is_empty()).then_some(s)
     }
 
     fn try_clone(&self) -> Obj {
@@ -523,6 +536,12 @@ fn describe(p: &Physical, mounts: &BTreeMap<String, Vec<String>>) -> Disk {
             Some("Solid State") => d.rotation_rate = Some(1),
             Some("Rotational") => d.rotation_rate = None,
             _ => {}
+        }
+    }
+    if d.model.is_empty() {
+        // No product name (virtual disks, some bridges): use the media's registry name.
+        if let Some(n) = p.media.name() {
+            d.model = n.strip_suffix(" Media").unwrap_or(&n).to_string();
         }
     }
     let ic = p
