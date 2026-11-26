@@ -1,0 +1,22 @@
+[package]
+name = "diskinfors"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "DiskInfoRS - S.M.A.R.T. disk health viewer for Linux and macOS"
+
+[[bin]]
+name = "diskinfors"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+smart-core = { path = "../../crates/smart-core" }
+tauri = { version = "2", features = [] }
+tauri-plugin-clipboard-manager = "2"
+serde.workspace = true
+serde_json.workspace = true
+libc.workspace = true
+chrono = { version = "0.4", default-features = false, features = ["clock"] }

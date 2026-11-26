@@ -1,0 +1,145 @@
+:root {
+  --bg: #14171c;
+  --panel: #1b1f26;
+  --panel-2: #222731;
+  --panel-3: #2a303b;
+  --border: #2e3540;
+  --text: #e6edf5;
+  --muted: #8b95a5;
+  --accent: #3aa0ff;
+  --good: #3ecf7a;
+  --caution: #f2b84b;
+  --bad: #ef5a5a;
+  --unknown: #7d8696;
+  --good-bg: #173a29;
+  --caution-bg: #44361a;
+  --bad-bg: #4a1e22;
+  --unknown-bg: #2a2f37;
+  --radius: 6px;
+  --mono: ui-monospace, 'JetBrains Mono', 'DejaVu Sans Mono', 'Liberation Mono', monospace;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 system-ui, 'Segoe UI', 'Noto Sans', 'DejaVu Sans', sans-serif;
+  user-select: none;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+button:hover {
+  background: var(--panel-3);
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #06121f;
+  font-weight: 600;
+}
+
+input,
+select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.c-Good {
+  --c: var(--good);
+  --cbg: var(--good-bg);
+}
+.c-Caution {
+  --c: var(--caution);
+  --cbg: var(--caution-bg);
+}
+.c-Bad {
+  --c: var(--bad);
+  --cbg: var(--bad-bg);
+}
+.c-Unknown {
+  --c: var(--unknown);
+  --cbg: var(--unknown-bg);
+}
+.dot[class*='c-'] {
+  background: var(--c);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--panel-3);
+  border-radius: 5px;
+  border: 2px solid var(--bg);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+  padding: 18px 20px;
+  min-width: 360px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+}
+.modal h2 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+.modal .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

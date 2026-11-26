@@ -1,0 +1,15 @@
+{
+  "bundle": {
+    "targets": [
+      "appimage"
+    ],
+    "externalBin": [
+      "binaries/diskinfo-helper"
+    ],
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
+  }
+}

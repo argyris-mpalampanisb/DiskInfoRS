@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DiskInfoRS",
+  "version": "0.1.0",
+  "identifier": "io.github.diskinfors",
+  "build": {
+    "frontendDist": "../ui/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "DiskInfoRS",
+        "width": 920,
+        "height": 760,
+        "minWidth": 760,
+        "minHeight": 560,
+        "theme": "Dark",
+        "backgroundColor": "#14171c"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "category": "Utility",
+    "shortDescription": "S.M.A.R.T. disk health viewer",
+    "longDescription": "DiskInfoRS shows S.M.A.R.T. health, temperature and attributes of SATA, USB-SATA and NVMe drives on Linux and macOS.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.icns"
+    ]
+  }
+}

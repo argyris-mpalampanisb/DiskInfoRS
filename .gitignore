@@ -1,0 +1,15 @@
+/target/
+/dist/
+app/ui/node_modules/
+app/ui/dist/
+app/src-tauri/gen/
+app/src-tauri/binaries/
+# Runtime data written next to the binary in portable mode
+DiskInfo.ini
+Smart/
+
+# Local Claude Code instructions
+CLAUDE.md
+
+# macOS
+.DS_Store

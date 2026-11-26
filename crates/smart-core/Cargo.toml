@@ -1,0 +1,10 @@
+[package]
+name = "smart-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "S.M.A.R.T. access (Linux: SG_IO / NVMe ioctls, macOS: IOKit) and health evaluation"
+
+[dependencies]
+serde.workspace = true
+libc.workspace = true
