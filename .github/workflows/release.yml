@@ -12,6 +12,9 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  # Prebuilt from tauri-apps/tauri releases (seconds instead of a 5-7 min `cargo install`).
+  # Bump by hand: gh release list -R tauri-apps/tauri | grep tauri-cli-v2
+  TAURI_CLI_VERSION: 2.12.6
 
 jobs:
   build:
@@ -46,7 +49,21 @@ jobs:
           cache-dependency-path: app/ui/package-lock.json
 
       - name: Install tauri-cli
-        run: cargo install tauri-cli --version '^2' --locked
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          triple=$(rustc -vV | sed -n 's/^host: //p')
+          [[ $RUNNER_OS == macOS ]] && ext=zip || ext=tgz
+          tmp=$(mktemp -d)
+          if gh release download "tauri-cli-v$TAURI_CLI_VERSION" -R tauri-apps/tauri \
+               -p "cargo-tauri-$triple.$ext" -D "$tmp"; then
+            if [[ $ext == zip ]]; then unzip -q "$tmp"/*.zip cargo-tauri -d "$tmp"; else tar xzf "$tmp"/*.tgz -C "$tmp" cargo-tauri; fi
+            install -m 0755 "$tmp/cargo-tauri" ~/.cargo/bin/cargo-tauri
+          else
+            echo "::warning::No prebuilt cargo-tauri for $triple, building from source"
+            cargo install tauri-cli --version "=$TAURI_CLI_VERSION" --locked
+          fi
+          cargo tauri --version
 
       - name: Build
         env:
